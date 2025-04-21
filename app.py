@@ -1,13 +1,13 @@
 import streamlit as st
+import numpy as np
 
 def get_dead_time(voltage):
-    # Simple linear interpolation or lookup
-    if voltage >= 14.0:
-        return 0.6
-    elif voltage >= 12.0:
-        return 1.0
-    else:
-        return 1.6
+    # Improved voltage-dead time curve (example values)
+    voltages = [10.0, 11.0, 12.0, 13.0, 14.0, 15.0]
+    dead_times = [1.6, 1.3, 1.0, 0.8, 0.6, 0.5]  # in milliseconds
+
+    return float(np.interp(voltage, voltages, dead_times))
+
 
 def fuel_injector_calculator():
     st.title("💉 Fuel Injector Calculator")
