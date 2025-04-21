@@ -59,5 +59,13 @@ def fuel_injector_calculator():
     st.write(f"**Actual Pulse Width:** {actual_pw_ms:.2f} ms")
     st.write(f"**Injector Duty Cycle:** {duty_cycle:.2f} %")
 
+    # 🔧 Optional: Fuel Flow Info
+    st.subheader("⛽ Fuel Flow Breakdown")
+    fuel_volume_gpm = fuel_mass_gpm / fuel_density
+    fuel_volume_per_injector = fuel_volume_gpm / cylinders
+
+    st.write(f"**Total Fuel Volume:** {fuel_volume_gpm:.2f} cc/min")
+    st.write(f"**Fuel Volume per Injector:** {fuel_volume_per_injector:.2f} cc/min")
+
 if __name__ == "__main__":
     fuel_injector_calculator()
