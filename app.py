@@ -13,6 +13,18 @@ def fuel_injector_calculator():
     st.title("💉 Fuel Injector Calculator")
 
     fuel_type = st.selectbox("Fuel Type", ['e85', '95 Octane', '98 Octane', 'Methanol'])
+    
+    # Display fuel properties based on selected fuel type
+    if fuel_type == '95 Octane':
+        st.caption("Stoichiometric AFR: 14.7 | Fuel density: 0.74 g/cc")
+    elif fuel_type == '98 Octane':
+        st.caption("Stoichiometric AFR: 14.6 | Fuel density: 0.74 g/cc")
+    elif fuel_type == 'Methanol':
+        st.caption("Stoichiometric AFR: 6.4 | Fuel density: 0.791 g/cc")
+    else:  # e85
+        st.caption("Stoichiometric AFR: 9.77 | Fuel density: 0.79 g/cc")
+    
+    # Now the rest of the engine-related inputs
     cylinders = st.number_input("Number of Cylinders", min_value=1, max_value=16, value=4, step=1)
     displacement_cc = st.slider("Engine Displacement (cc)", 500, 8000, 2000, step=100)
     injector_cc = st.slider("Injector Size (cc/min)", 100, 3000, 1300, step=50)
