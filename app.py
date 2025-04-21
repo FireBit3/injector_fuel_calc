@@ -1,5 +1,14 @@
 import streamlit as st
 
+def get_dead_time(voltage):
+    # Simple linear interpolation or lookup
+    if voltage >= 14.0:
+        return 0.6
+    elif voltage >= 12.0:
+        return 1.0
+    else:
+        return 1.6
+
 def fuel_injector_calculator():
     st.title("💉 Fuel Injector Calculator")
 
@@ -11,6 +20,7 @@ def fuel_injector_calculator():
     map_kpa = st.slider("Manifold Air Pressure (kPa)", 80, 400, 300)
     lambda_target = st.slider("Target Lambda", 0.6, 1.2, 0.8)
     iat_c = st.slider("Intake Air Temp (°C)", -20, 80, 20)
+    voltage = st.slider("Battery Voltage (V)", 10.0, 15.0, 13.8, step=0.1)
 
     cylinders = 4
     molar_mass_air = 28.97
@@ -34,12 +44,19 @@ def fuel_injector_calculator():
     fuel_volume_per_cyl_cc = fuel_mass_per_cyl / fuel_density
     injector_cc_per_ms = injector_cc / 60000
     base_pw_ms = fuel_volume_per_cyl_cc / injector_cc_per_ms
+
+    # Include dead time
+    dead_time_ms = get_dead_time(voltage)
+    actual_pw_ms = base_pw_ms + dead_time_ms
+
     time_per_cycle_ms = 120000 / rpm
-    duty_cycle = (base_pw_ms / time_per_cycle_ms) * 100
+    duty_cycle = (actual_pw_ms / time_per_cycle_ms) * 100
 
     st.subheader("📊 Results")
     st.write(f"**Target AFR:** {target_afr:.2f}")
     st.write(f"**Base Pulse Width:** {base_pw_ms:.2f} ms")
+    st.write(f"**Dead Time:** {dead_time_ms:.2f} ms (at {voltage:.1f} V)")
+    st.write(f"**Actual Pulse Width:** {actual_pw_ms:.2f} ms")
     st.write(f"**Injector Duty Cycle:** {duty_cycle:.2f} %")
 
 if __name__ == "__main__":
