@@ -22,7 +22,8 @@ def fuel_injector_calculator():
     iat_c = st.slider("Intake Air Temp (°C)", -20, 80, 20)
     voltage = st.slider("Battery Voltage (V)", 10.0, 15.0, 13.8, step=0.1)
 
-    cylinders = 4
+    cylinders = st.number_input("Number of Cylinders", min_value=1, max_value=16, value=4, step=1)
+
     molar_mass_air = 28.97
     R = 8.314
     afr_stoich = 14.7 if fuel_type == '95' else 9.765
