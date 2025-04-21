@@ -25,7 +25,8 @@ def fuel_injector_calculator():
 
     molar_mass_air = 28.97
     R = 8.314
-   if fuel_type == '95 Octane':
+
+    if fuel_type == '95 Octane':
         afr_stoich = 14.7
         fuel_density = 0.74
     elif fuel_type == '98 Octane':
@@ -38,6 +39,7 @@ def fuel_injector_calculator():
         afr_stoich = 9.765
         fuel_density = 0.79
 
+    
     target_afr = afr_stoich * lambda_target
     ve_decimal = ve_percent / 100.0
 
