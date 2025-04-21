@@ -2,9 +2,8 @@ import streamlit as st
 import numpy as np
 
 def get_dead_time(voltage):
-    # Improved voltage-dead time curve (example values)
     voltages = [10.0, 11.0, 12.0, 13.0, 14.0, 15.0]
-    dead_times = [1.6, 1.3, 1.0, 0.8, 0.6, 0.5]  # in milliseconds
+    dead_times = [1.6, 1.3, 1.0, 0.8, 0.6, 0.5]  # ms
     return float(np.interp(voltage, voltages, dead_times))
 
 def fuel_injector_calculator():
@@ -21,13 +20,21 @@ def fuel_injector_calculator():
     else:  # e85
         st.caption("Stoichiometric AFR: 9.77 | Fuel density: 0.79 g/cc")
 
-    # Select engine type
     engine_type = st.selectbox("Engine Type", ["Naturally Aspirated", "Turbocharged"])
 
-    # Engine specs
     cylinders = st.number_input("Number of Cylinders", min_value=1, max_value=16, value=4, step=1)
-    displacement_cc = st.slider("Engine Displacement (cc)", 500, 8000, 2000, step=100)
-    injector_cc = st.slider("Injector Size (cc/min)", 100, 3000, 1300, step=50)
+
+    # Text fields for displacement and injector size
+    displacement_input = st.text_input("Engine Displacement (cc)", value="2000")
+    injector_input = st.text_input("Injector Size (cc/min)", value="1300")
+
+    try:
+        displacement_cc = int(displacement_input)
+        injector_cc = int(injector_input)
+    except ValueError:
+        st.error("Please enter valid numbers for displacement and injector size.")
+        return
+
     rpm = st.slider("Engine RPM", 500, 10000, 6000, step=100)
     ve_percent = st.slider("Volumetric Efficiency (%)", 50, 120, 91)
     map_kpa = st.slider("Manifold Air Pressure (kPa)", 80, 400, 300)
@@ -55,12 +62,10 @@ def fuel_injector_calculator():
         fuel_density = 0.79
         fuel_energy = 12500
 
-    # BSFC based on engine type
     bsfc = 0.45 if engine_type == "Naturally Aspirated" else 0.55
 
     target_afr = afr_stoich * lambda_target
     ve_decimal = ve_percent / 100.0
-
     engine_cycle_per_min = rpm / 2
     air_volume_lpm = (displacement_cc / 1000) * engine_cycle_per_min * ve_decimal
 
@@ -76,7 +81,6 @@ def fuel_injector_calculator():
     injector_cc_per_ms = injector_cc / 60000
     base_pw_ms = fuel_volume_per_cyl_cc / injector_cc_per_ms
 
-    # Include dead time
     dead_time_ms = get_dead_time(voltage)
     actual_pw_ms = base_pw_ms + dead_time_ms
 
@@ -90,19 +94,16 @@ def fuel_injector_calculator():
     st.write(f"**Actual Pulse Width:** {actual_pw_ms:.2f} ms")
     st.write(f"**Injector Duty Cycle:** {duty_cycle:.2f} %")
 
-    # 🔧 Fuel Flow Info
     st.subheader("⛽ Fuel Flow Breakdown")
     fuel_volume_gpm = fuel_mass_gpm / fuel_density
     fuel_volume_per_injector = fuel_volume_gpm / cylinders
     st.write(f"**Total Fuel Volume:** {fuel_volume_gpm:.2f} cc/min")
     st.write(f"**Fuel Volume per Injector:** {fuel_volume_per_injector:.2f} cc/min")
 
-    # 🏎️ Power Estimation
     st.subheader("🏎️ Power Estimation")
-    fuel_mass_lph = (fuel_mass_gpm / 453.592) * 60  # g/min → lb/hr
-    hp_theoretical = (fuel_mass_lph * fuel_energy * 0.25) / 2545  # thermal efficiency estimate
+    fuel_mass_lph = (fuel_mass_gpm / 453.592) * 60
+    hp_theoretical = (fuel_mass_lph * fuel_energy * 0.25) / 2545
     hp_bsfc = fuel_mass_lph / bsfc
-
     st.write(f"**Theoretical HP (25% Efficiency):** {hp_theoretical:.0f} hp")
     st.write(f"**Estimated Engine HP (Based on BSFC ~{bsfc}):** {hp_bsfc:.0f} hp")
 
