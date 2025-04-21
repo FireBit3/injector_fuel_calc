@@ -12,7 +12,7 @@ def get_dead_time(voltage):
 def fuel_injector_calculator():
     st.title("💉 Fuel Injector Calculator")
 
-    fuel_type = st.selectbox("Fuel Type", ['e85', '95'])
+    fuel_type = st.selectbox("Fuel Type", ['e85', '95 Octane', '98 Octane', 'Methanol'])
     cylinders = st.number_input("Number of Cylinders", min_value=1, max_value=16, value=4, step=1)
     displacement_cc = st.slider("Engine Displacement (cc)", 500, 8000, 2000, step=100)
     injector_cc = st.slider("Injector Size (cc/min)", 100, 3000, 1300, step=50)
@@ -25,7 +25,19 @@ def fuel_injector_calculator():
 
     molar_mass_air = 28.97
     R = 8.314
-    afr_stoich = 14.7 if fuel_type == '95' else 9.765
+   if fuel_type == '95 Octane':
+        afr_stoich = 14.7
+        fuel_density = 0.74
+    elif fuel_type == '98 Octane':
+        afr_stoich = 14.6
+        fuel_density = 0.74
+    elif fuel_type == 'Methanol':
+        afr_stoich = 6.4
+        fuel_density = 0.791
+    else:  # e85
+        afr_stoich = 9.765
+        fuel_density = 0.79
+
     target_afr = afr_stoich * lambda_target
     ve_decimal = ve_percent / 100.0
 
@@ -38,8 +50,7 @@ def fuel_injector_calculator():
 
     air_mass_gpm = air_volume_lpm * air_density
     fuel_mass_gpm = air_mass_gpm / target_afr
-    fuel_density = 0.74 if fuel_type == '95' else 0.79
-
+    
     fuel_mass_per_cyl = fuel_mass_gpm / engine_cycle_per_min / cylinders
     fuel_volume_per_cyl_cc = fuel_mass_per_cyl / fuel_density
     injector_cc_per_ms = injector_cc / 60000
