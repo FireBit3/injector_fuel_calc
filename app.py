@@ -13,6 +13,7 @@ def fuel_injector_calculator():
     st.title("💉 Fuel Injector Calculator")
 
     fuel_type = st.selectbox("Fuel Type", ['e85', '95'])
+    cylinders = st.number_input("Number of Cylinders", min_value=1, max_value=16, value=4, step=1)
     displacement_cc = st.slider("Engine Displacement (cc)", 500, 8000, 2000, step=100)
     injector_cc = st.slider("Injector Size (cc/min)", 100, 3000, 1300, step=50)
     rpm = st.slider("Engine RPM", 500, 10000, 6000, step=100)
@@ -21,8 +22,6 @@ def fuel_injector_calculator():
     lambda_target = st.slider("Target Lambda", 0.6, 1.2, 0.8)
     iat_c = st.slider("Intake Air Temp (°C)", -20, 80, 20)
     voltage = st.slider("Battery Voltage (V)", 10.0, 15.0, 13.8, step=0.1)
-
-    cylinders = st.number_input("Number of Cylinders", min_value=1, max_value=16, value=4, step=1)
 
     molar_mass_air = 28.97
     R = 8.314
