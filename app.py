@@ -5,16 +5,13 @@ def get_dead_time(voltage):
     # Improved voltage-dead time curve (example values)
     voltages = [10.0, 11.0, 12.0, 13.0, 14.0, 15.0]
     dead_times = [1.6, 1.3, 1.0, 0.8, 0.6, 0.5]  # in milliseconds
-
     return float(np.interp(voltage, voltages, dead_times))
-
 
 def fuel_injector_calculator():
     st.title("💉 Fuel Injector Calculator")
 
     fuel_type = st.selectbox("Fuel Type", ['e85', '95 Octane', '98 Octane', 'Methanol'])
-    
-    # Display fuel properties based on selected fuel type
+
     if fuel_type == '95 Octane':
         st.caption("Stoichiometric AFR: 14.7 | Fuel density: 0.74 g/cc")
     elif fuel_type == '98 Octane':
@@ -23,8 +20,11 @@ def fuel_injector_calculator():
         st.caption("Stoichiometric AFR: 6.4 | Fuel density: 0.791 g/cc")
     else:  # e85
         st.caption("Stoichiometric AFR: 9.77 | Fuel density: 0.79 g/cc")
-    
-    # Now the rest of the engine-related inputs
+
+    # Select engine type
+    engine_type = st.selectbox("Engine Type", ["Naturally Aspirated", "Turbocharged"])
+
+    # Engine specs
     cylinders = st.number_input("Number of Cylinders", min_value=1, max_value=16, value=4, step=1)
     displacement_cc = st.slider("Engine Displacement (cc)", 500, 8000, 2000, step=100)
     injector_cc = st.slider("Injector Size (cc/min)", 100, 3000, 1300, step=50)
@@ -41,17 +41,23 @@ def fuel_injector_calculator():
     if fuel_type == '95 Octane':
         afr_stoich = 14.7
         fuel_density = 0.74
+        fuel_energy = 19000
     elif fuel_type == '98 Octane':
         afr_stoich = 14.6
         fuel_density = 0.74
+        fuel_energy = 19000
     elif fuel_type == 'Methanol':
         afr_stoich = 6.4
         fuel_density = 0.791
+        fuel_energy = 9500
     else:  # e85
         afr_stoich = 9.765
         fuel_density = 0.79
+        fuel_energy = 12500
 
-    
+    # BSFC based on engine type
+    bsfc = 0.45 if engine_type == "Naturally Aspirated" else 0.55
+
     target_afr = afr_stoich * lambda_target
     ve_decimal = ve_percent / 100.0
 
@@ -64,7 +70,7 @@ def fuel_injector_calculator():
 
     air_mass_gpm = air_volume_lpm * air_density
     fuel_mass_gpm = air_mass_gpm / target_afr
-    
+
     fuel_mass_per_cyl = fuel_mass_gpm / engine_cycle_per_min / cylinders
     fuel_volume_per_cyl_cc = fuel_mass_per_cyl / fuel_density
     injector_cc_per_ms = injector_cc / 60000
@@ -84,13 +90,21 @@ def fuel_injector_calculator():
     st.write(f"**Actual Pulse Width:** {actual_pw_ms:.2f} ms")
     st.write(f"**Injector Duty Cycle:** {duty_cycle:.2f} %")
 
-    # 🔧 Optional: Fuel Flow Info
+    # 🔧 Fuel Flow Info
     st.subheader("⛽ Fuel Flow Breakdown")
     fuel_volume_gpm = fuel_mass_gpm / fuel_density
     fuel_volume_per_injector = fuel_volume_gpm / cylinders
-
     st.write(f"**Total Fuel Volume:** {fuel_volume_gpm:.2f} cc/min")
     st.write(f"**Fuel Volume per Injector:** {fuel_volume_per_injector:.2f} cc/min")
+
+    # 🏎️ Power Estimation
+    st.subheader("🏎️ Power Estimation")
+    fuel_mass_lph = (fuel_mass_gpm / 453.592) * 60  # g/min → lb/hr
+    hp_theoretical = (fuel_mass_lph * fuel_energy * 0.25) / 2545  # thermal efficiency estimate
+    hp_bsfc = fuel_mass_lph / bsfc
+
+    st.write(f"**Theoretical HP (25% Efficiency):** {hp_theoretical:.0f} hp")
+    st.write(f"**Estimated Engine HP (Based on BSFC ~{bsfc}):** {hp_bsfc:.0f} hp")
 
 if __name__ == "__main__":
     fuel_injector_calculator()
